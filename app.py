@@ -33,7 +33,12 @@ def after_request(response):
 @login_required
 def index():
     """Show main page"""
-    return render_template("index.html")
+
+    # Query database for friend requests:
+    friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? OR user2_id = ?", session["user_id"], session["user_id"])
+    print(friend_requests)
+    return render_template("index.html", friend_requests=friend_requests, user_id = session["user_id"])
+
 
 @app.route("/add", methods=["GET", "POST"])
 @login_required
@@ -89,18 +94,23 @@ def add_friend():
         # Make sure that all fields are filled out
         friend = request.form.get("friend")
 
-        # Add friend to database
+        # Query database for username
+        rows = db.execute(
+            "SELECT * FROM users WHERE username = ?", friend)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1:
+            flash("Username not found")
+            return redirect("/addfriend")
+
+        # Add friend request to database
         db.execute(
-            "INSERT INTO flats (title, link, rooms, price, added_by, location, comments) VALUES(?, ?, ?, ?, ?, ?, ?)",
-            title,
-            link,
-            rooms,
-            price,
+            "INSERT INTO friends (user1_id, user2_id, confirmed) VALUES(?, ?, ?)",
             session["user_id"],
-            location,
-            comments,
+            rows[0]["id"],
+            "False",
         )
-        flash("Friend request send!")
+        flash("Friend request sent!")
         return redirect("/")
     else:
         return render_template("addfriend.html")
