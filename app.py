@@ -35,8 +35,7 @@ def index():
     """Show main page"""
 
     # Query database for friend requests:
-    friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? OR user2_id = ?", session["user_id"], session["user_id"])
-    print(friend_requests)
+    friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ?", session["user_id"])
     return render_template("index.html", friend_requests=friend_requests, user_id = session["user_id"])
 
 
@@ -102,6 +101,20 @@ def add_friend():
         if len(rows) != 1:
             flash("Username not found")
             return redirect("/addfriend")
+
+        # Check if friend request already exists:
+        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? AND user2_id = ?", session["user_id"], rows[0]["id"])
+        if len(friend_requests) == 1:
+            flash("Friend request already sent")
+            return redirect("/")
+
+        # Accept friend if request already exists:
+
+        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        if len(friend_requests) == 1:
+            db.execute("UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+            flash("Friend request accepted")
+            return redirect("/")
 
         # Add friend request to database
         db.execute(
