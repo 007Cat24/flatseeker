@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add new flat
+{% endblock %}
+
+{% block main %}
+<h3>Add a new flat</h3>
+<br>
+    <form action="/add" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" placeholder="Give your flat a title" type="text">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="link" name="link" placeholder="Link to the flat" type="text">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="rooms" name="rooms" placeholder="Number of rooms" type="text">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="price" name="price" placeholder="Enter the price" type="text">
+        </div>
+        <p>Optional:</p>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="location" name="location" placeholder="Location" type="text">
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="comments" name="comments" placeholder="Comments" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+{% endblock %}
