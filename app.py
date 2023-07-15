@@ -6,7 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from login_helper import login_required, apology
+from login_helper import login_required, apology, check_password
 
 # Configure application
 app = Flask(__name__)
@@ -50,6 +50,9 @@ def changepwd():
             return apology("Please fill out all fields!")
         if new_password != confirm:
             return apology("Passwords don't match")
+        if not check_password(new_password):
+            flash("Password doesn't meet requirements")
+            return redirect("/register")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
@@ -139,6 +142,10 @@ def register():
 
         if password != confirm:
             return apology("Passwords don't match")
+
+        if not check_password(password):
+            flash("Password doesn't meet requirements")
+            return redirect("/register")
 
         # Make sure username is unique
         username_exists = db.execute("SELECT * FROM users WHERE username = ?", username)
