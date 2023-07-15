@@ -7,7 +7,9 @@
 {% block main %}
 <h3>Welcome to Flatseeker!</h3>
 {% if friend_requests %}
-<p>You have outstanding friend requests</p>
+<br>
+<h5>You have outstanding friend requests:</h5>
+<br>
     {% for friend_request in friend_requests %}
         <p>Request from {{friend_request.user1_name}}</p>
         <form action="/addfriend" method="post">

@@ -174,7 +174,25 @@ def changepwd():
         # Show registration form
         return render_template("changepwd.html")
 
+@app.route("/friends")
+@login_required
+def friends():
+    """Show list of friends"""
 
+    return apology("Todo")
+    # Query database for friends:
+    friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?", session["user_id"], session["user_id"])
+    for friend in friends:
+        rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
+        friend["user1_name"] = rows[0]["username"]
+    return render_template("friends.html", friends=friends)
+
+@app.route("/view")
+@login_required
+def viewallflats():
+    """Show list of all flats"""
+
+    return apology("Todo")
 
 
 @app.route("/login", methods=["GET", "POST"])
