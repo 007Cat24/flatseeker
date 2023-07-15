@@ -37,7 +37,7 @@ def index():
 
 @app.route("/add", methods=["GET", "POST"])
 @login_required
-def add():
+def add_flat():
     """Allow user to add flats"""
 
     if request.method == "POST":
@@ -80,7 +80,30 @@ def add():
     else:
         return render_template("add.html")
 
+@app.route("/addfriend", methods=["GET", "POST"])
+@login_required
+def add_friend():
+    """Allow user to add friends"""
 
+    if request.method == "POST":
+        # Make sure that all fields are filled out
+        friend = request.form.get("friend")
+
+        # Add friend to database
+        db.execute(
+            "INSERT INTO flats (title, link, rooms, price, added_by, location, comments) VALUES(?, ?, ?, ?, ?, ?, ?)",
+            title,
+            link,
+            rooms,
+            price,
+            session["user_id"],
+            location,
+            comments,
+        )
+        flash("Friend request send!")
+        return redirect("/")
+    else:
+        return render_template("addfriend.html")
 
 @app.route("/changepwd", methods=["GET", "POST"])
 @login_required
@@ -117,6 +140,8 @@ def changepwd():
     else:
         # Show registration form
         return render_template("changepwd.html")
+
+
 
 
 @app.route("/login", methods=["GET", "POST"])

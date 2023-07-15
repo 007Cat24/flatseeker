@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Friend request
+{% endblock %}
+
+{% block main %}
+<h3>Add a friend by typing in their username below</h3>
+<br>
+    <form action="/addfriend" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="friend" name="friend" placeholder="Friend's username" type="text">
+        </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Send friend request</button>
+    </form>
+{% endblock %}
