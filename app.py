@@ -33,7 +33,7 @@ def after_request(response):
 @login_required
 def index():
     """Show main page"""
-    return "Not yet implemented"
+    return apology("Not yet implemented :(")
 
 
 @app.route("/changepwd", methods=["GET", "POST"])
