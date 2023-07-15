@@ -36,6 +36,9 @@ def index():
 
     # Query database for friend requests:
     friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ?", session["user_id"])
+    for friend in friend_requests:
+        rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user2_id"])
+        friend["user2_name"] = rows[0]["username"]
     return render_template("index.html", friend_requests=friend_requests, user_id = session["user_id"])
 
 
@@ -197,6 +200,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         # Redirect user to home page
         return redirect("/")
