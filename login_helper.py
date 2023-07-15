@@ -41,3 +41,10 @@ def apology(message, code=400):
         return s
 
     return render_template("apology.html", top=code, bottom=escape(message)), code
+
+def check_password(password):
+    special_characters = " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+    if len(password) >= 8 and any(c in special_characters for c in password):
+        return True
+    else:
+        return False

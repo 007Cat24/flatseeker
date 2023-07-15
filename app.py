@@ -6,7 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from login_helper import login_required, apology
+from login_helper import login_required, apology, check_password
 
 # Configure application
 app = Flask(__name__)
@@ -39,21 +39,28 @@ def index():
 @app.route("/changepwd", methods=["GET", "POST"])
 @login_required
 def changepwd():
+    """Allow user to change password"""
+
     if request.method == "POST":
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
         confirm = request.form.get("confirmation")
+        # Make sure all fields are filled out and the user made no typos
         if not old_password or not new_password or not confirm:
             return apology("Please fill out all fields!")
         if new_password != confirm:
             return apology("Passwords don't match")
+        if not check_password(new_password):
+            flash("Password doesn't meet requirements")
+            return redirect("/register")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
 
+        # Check if password is correct
         if not check_password_hash(rows[0]["hash"], old_password):
             return apology("invalid password", 403)
-
+        # Update password
         db.execute(
             "UPDATE users SET hash = ? WHERE id = ?",
             generate_password_hash(new_password),
@@ -62,6 +69,7 @@ def changepwd():
 
         return redirect("/")
     else:
+        # Show registration form
         return render_template("changepwd.html")
 
 
@@ -123,24 +131,33 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
         confirm = request.form.get("confirmation")
+        email = request.form.get("email")
 
+        # Make sure all fields are filled out
         if not username:
             return apology("Username blank")
 
+        if not password or not confirm:
+            return apology("Fill out both password fields")
+
+        if password != confirm:
+            return apology("Passwords don't match")
+
+        if not check_password(password):
+            flash("Password doesn't meet requirements")
+            return redirect("/register")
+
+        # Make sure username is unique
         username_exists = db.execute("SELECT * FROM users WHERE username = ?", username)
         if username_exists:
             return apology("Username already exists")
 
-        if not password or not confirm:
-            return apology("Fill out both password fields")
-        if password != confirm:
-            return apology("Passwords don't match")
-
-        # User passed all checks
+        # Register user
         db.execute(
-            "INSERT INTO users (username, hash) VALUES(?, ?)",
+            "INSERT INTO users (username, hash, email) VALUES(?, ?, ?)",
             username,
             generate_password_hash(password),
+            email,
         )
         return redirect("/")
     else:
