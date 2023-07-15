@@ -35,6 +35,52 @@ def index():
     """Show main page"""
     return render_template("index.html")
 
+@app.route("/add", methods=["GET", "POST"])
+@login_required
+def add():
+    """Allow user to add flats"""
+
+    if request.method == "POST":
+        # Make sure that all fields are filled out
+        title = request.form.get("title")
+        link = request.form.get("link")
+        rooms = request.form.get("rooms")
+        price = request.form.get("price")
+        location = request.form.get("location")
+        comments = request.form.get("comments")
+
+        if not title or not link or not rooms or not price:
+            return apology("Please fill out all required fields before submitting!")
+
+        # Validate numeric inputs
+        if rooms.isnumeric() and int(rooms) >= 1:
+            rooms = int(rooms)
+        else:
+            return apology("Please only enter numbers in the room field")
+
+        if price.isnumeric() and int(price) > 0:
+            price = int(price)
+        else:
+            return apology("Please only enter numbers in the price field")
+
+
+        # Add flat to database
+        db.execute(
+            "INSERT INTO flats (title, link, rooms, price, added_by, location, comments) VALUES(?, ?, ?, ?, ?, ?, ?)",
+            title,
+            link,
+            rooms,
+            price,
+            session["user_id"],
+            location,
+            comments,
+        )
+        flash("Flat added successfully")
+        return redirect("/")
+    else:
+        return render_template("add.html")
+
+
 
 @app.route("/changepwd", methods=["GET", "POST"])
 @login_required
