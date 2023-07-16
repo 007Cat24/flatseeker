@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Flats
+{% endblock %}
+
+{% block main %}
+<table class="table table-sm table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Title</th>
+            <th>Cost</th>
+            <th>Number of rooms</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+            {% for flat in flats %}
+        <tr>
+            <td>{{ flat.title }}</td>
+            <td>{{ flat.price }}€</td>
+            <td>{{ flat.rooms }}</td>
+            <td><a href="/flat?id={{ flat.id }}">Show more</a></td>
+        </tr>
+            {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+

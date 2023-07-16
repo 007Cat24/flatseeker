@@ -210,8 +210,22 @@ def friends():
 @login_required
 def viewallflats():
     """Show list of all flats"""
+    flats = db.execute("SELECT * FROM flats")
+    return render_template("view.html", flats=flats)
 
-    return apology("Todo")
+@app.route("/flat")
+@login_required
+def viewflat():
+    """Show individual flat"""
+    flat_id = request.args.get('id')
+    if flat_id:
+        flats = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
+        if len(flats) == 1:
+            return flats
+        else:
+            return apology("Flat not found")
+    else:
+        return apology("Invalid input")
 
 
 @app.route("/login", methods=["GET", "POST"])

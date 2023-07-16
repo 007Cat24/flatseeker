@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Friends
+{% endblock %}
+
+{% block main %}
+<h3>Your friends:</h3>
+{% if friends %}
+<br>
+    {% for friend in friends %}
+        <p>{{friend.user1_name}}</p>
+        <form action="/addfriend" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" id="friend" name="friend" value="{{friend.user1_name}}" type="hidden">
+                <input class="form-control mx-auto w-auto" id="ignore" name="ignore" value="True" type="hidden">
+            </div>
+            <button class="btn btn-primary" type="submit">Delete</button>
+        </form>
+    {% endfor %}
+{% endif %}
+{% endblock %}
