@@ -230,6 +230,27 @@ def viewflat():
     else:
         return apology("Invalid input")
 
+@app.route("/delete")
+@login_required
+def deleteflat():
+    """Delete flat"""
+    flat_id = request.args.get('id')
+    if flat_id:
+        flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
+        if len(flat) == 1:
+            flat = flat[0]
+            # Make sure users can only delete their own flat
+            if flat["added_by"] == session["user_id"]:
+                db.execute("DELETE FROM flats WHERE id = ?", flat_id)
+                flash("Flat deleted")
+                return redirect("/view")
+            else:
+                return apology("Unauthorised")
+        else:
+            return apology("Flat not found")
+    else:
+        return apology("Invalid input")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
