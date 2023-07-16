@@ -118,13 +118,22 @@ def add_friend():
             flash("Friend request already sent")
             return redirect("/")
 
-        # Accept friend if request already exists:
+
+        # Accept friend if request already exists, ignore otherwise:
         print("accepting if exists")
         friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
         if len(friend_requests) == 1:
-            db.execute("UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
-            flash("Friend request accepted")
-            return redirect("/")
+            ignore = request.form.get("ignore")
+            if ignore == "False":
+                db.execute("UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend request accepted")
+                return redirect("/")
+            elif ignore == "True":
+                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend request ignored")
+                return redirect("/")
+            else:
+                return apology("Server error")
 
         # Add friend request to database
         db.execute(
@@ -137,6 +146,7 @@ def add_friend():
         return redirect("/")
     else:
         return render_template("addfriend.html")
+
 
 @app.route("/changepwd", methods=["GET", "POST"])
 @login_required

@@ -15,8 +15,16 @@
         <form action="/addfriend" method="post">
             <div class="mb-3">
                 <input class="form-control mx-auto w-auto" id="friend" name="friend" value="{{friend_request.user1_name}}" type="hidden">
+                <input class="form-control mx-auto w-auto" id="ignore" name="ignore" value="False" type="hidden">
             </div>
             <button class="btn btn-primary" type="submit">Accept</button>
+        </form>
+        <form action="/addfriend" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" id="friend" name="friend" value="{{friend_request.user1_name}}" type="hidden">
+                <input class="form-control mx-auto w-auto" id="ignore" name="ignore" value="True" type="hidden">
+            </div>
+            <button class="btn btn-primary" type="submit">Ignore</button>
         </form>
     {% endfor %}
 {% endif %}
