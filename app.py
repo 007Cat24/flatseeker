@@ -19,6 +19,7 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///flatseeker.db")
 
+
 # TEMPORARY
 @app.after_request
 def after_request(response):
@@ -35,11 +36,16 @@ def index():
     """Show main page"""
 
     # Query database for friend requests:
-    friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ?", session["user_id"])
+    friend_requests = db.execute(
+        "SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ?",
+        session["user_id"],
+    )
     for friend in friend_requests:
         rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
         friend["user1_name"] = rows[0]["username"]
-    return render_template("index.html", friend_requests=friend_requests, user_id = session["user_id"])
+    return render_template(
+        "index.html", friend_requests=friend_requests, user_id=session["user_id"]
+    )
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -70,7 +76,6 @@ def add_flat():
         else:
             return apology("Please only enter numbers in the price field")
 
-
         # Add flat to database
         db.execute(
             "INSERT INTO flats (title, link, rooms, price, added_by, location, comments) VALUES(?, ?, ?, ?, ?, ?, ?)",
@@ -87,6 +92,7 @@ def add_flat():
     else:
         return render_template("add.html")
 
+
 @app.route("/addfriend", methods=["GET", "POST"])
 @login_required
 def add_friend():
@@ -101,45 +107,66 @@ def add_friend():
             return apology("You can't add yourself!")
 
         # Query database for username
-        rows = db.execute(
-            "SELECT * FROM users WHERE username = ?", friend)
+        rows = db.execute("SELECT * FROM users WHERE username = ?", friend)
 
         # Ensure username exists and password is correct
         if len(rows) != 1:
             flash("Username not found")
             return redirect("/addfriend")
 
-
         # Check if friend request already exists:
-        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? AND user2_id = ?", session["user_id"], rows[0]["id"])
+        friend_requests = db.execute(
+            "SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? AND user2_id = ?",
+            session["user_id"],
+            rows[0]["id"],
+        )
         print(friend_requests)
         if len(friend_requests) == 1:
             flash("Friend request already sent")
             return redirect("/")
 
-
         # Accept friend if request already exists, ignore otherwise:
-        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        friend_requests = db.execute(
+            "SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?",
+            session["user_id"],
+            rows[0]["id"],
+        )
         if len(friend_requests) == 1:
             ignore = request.form.get("ignore")
             if ignore == "False":
-                db.execute("UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                db.execute(
+                    "UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?",
+                    session["user_id"],
+                    rows[0]["id"],
+                )
                 flash("Friend request accepted")
                 return redirect("/")
             elif ignore == "True":
-                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                db.execute(
+                    "DELETE FROM friends WHERE user2_id = ? AND user1_id = ?",
+                    session["user_id"],
+                    rows[0]["id"],
+                )
                 flash("Friend request ignored")
                 return redirect("/")
             else:
                 return apology("Server error")
 
         # Delete friend
-        confirmed_friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        confirmed_friends = db.execute(
+            "SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? AND user1_id = ?",
+            session["user_id"],
+            rows[0]["id"],
+        )
         ignore = request.form.get("ignore")
         if ignore == "True":
-                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
-                flash("Friend deleted")
-                return redirect("/")
+            db.execute(
+                "DELETE FROM friends WHERE user2_id = ? AND user1_id = ?",
+                session["user_id"],
+                rows[0]["id"],
+            )
+            flash("Friend deleted")
+            return redirect("/")
 
         # Add friend request to database
         db.execute(
@@ -190,21 +217,31 @@ def changepwd():
         # Show registration form
         return render_template("changepwd.html")
 
+
 @app.route("/friends")
 @login_required
 def friends():
     """Show list of friends"""
 
     # Query database for friends:
-    friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?", session["user_id"], session["user_id"])
+    friends = db.execute(
+        "SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?",
+        session["user_id"],
+        session["user_id"],
+    )
     for friend in friends:
         if friend["user1_id"] != session["user_id"]:
-            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
+            rows = db.execute(
+                "SELECT username FROM users WHERE id = ?", friend["user1_id"]
+            )
             friend["user1_name"] = rows[0]["username"]
         else:
-            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user2_id"])
+            rows = db.execute(
+                "SELECT username FROM users WHERE id = ?", friend["user2_id"]
+            )
             friend["user1_name"] = rows[0]["username"]
     return render_template("friends.html", friends=friends)
+
 
 @app.route("/view")
 @login_required
@@ -213,16 +250,19 @@ def viewallflats():
     flats = db.execute("SELECT * FROM flats")
     return render_template("view.html", flats=flats)
 
+
 @app.route("/flat")
 @login_required
 def viewflat():
     """Show individual flat"""
-    flat_id = request.args.get('id')
+    flat_id = request.args.get("id")
     if flat_id:
         flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
         if len(flat) == 1:
             flat = flat[0]
-            rows = db.execute("SELECT username FROM users WHERE id = ?", flat["added_by"])
+            rows = db.execute(
+                "SELECT username FROM users WHERE id = ?", flat["added_by"]
+            )
             flat["username"] = rows[0]["username"]
             return render_template("flat.html", flat=flat)
         else:
@@ -230,11 +270,12 @@ def viewflat():
     else:
         return apology("Invalid input")
 
+
 @app.route("/delete")
 @login_required
 def deleteflat():
     """Delete flat"""
-    flat_id = request.args.get('id')
+    flat_id = request.args.get("id")
     if flat_id:
         flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
         if len(flat) == 1:
@@ -251,11 +292,12 @@ def deleteflat():
     else:
         return apology("Invalid input")
 
+
 @app.route("/edit")
 @login_required
 def editflat():
     """Edit flat"""
-    flat_id = request.args.get('id')
+    flat_id = request.args.get("id")
     if flat_id:
         flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
         if len(flat) == 1:
@@ -324,7 +366,6 @@ def logout():
     return redirect("/")
 
 
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -363,5 +404,3 @@ def register():
         return redirect("/")
     else:
         return render_template("register.html")
-
-
