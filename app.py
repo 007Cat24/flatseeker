@@ -251,6 +251,27 @@ def deleteflat():
     else:
         return apology("Invalid input")
 
+@app.route("/edit")
+@login_required
+def editflat():
+    """Edit flat"""
+    flat_id = request.args.get('id')
+    if flat_id:
+        flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
+        if len(flat) == 1:
+            flat = flat[0]
+            # Make sure users can only edit their own flat
+            if flat["added_by"] == session["user_id"]:
+                # TODO: Serve form with edit fields
+                # TODO: Save changes
+                return redirect("/view")
+            else:
+                return apology("Unauthorised")
+        else:
+            return apology("Flat not found")
+    else:
+        return apology("Invalid input")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
