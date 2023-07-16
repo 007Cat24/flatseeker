@@ -6,4 +6,26 @@
 
 {% block main %}
 <h3>Welcome to Flatseeker!</h3>
+{% if friend_requests %}
+<br>
+<h5>You have outstanding friend requests:</h5>
+<br>
+    {% for friend_request in friend_requests %}
+        <p>Request from {{friend_request.user1_name}}</p>
+        <form action="/addfriend" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" id="friend" name="friend" value="{{friend_request.user1_name}}" type="hidden">
+                <input class="form-control mx-auto w-auto" id="ignore" name="ignore" value="False" type="hidden">
+            </div>
+            <button class="btn btn-primary" type="submit">Accept</button>
+        </form>
+        <form action="/addfriend" method="post">
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" id="friend" name="friend" value="{{friend_request.user1_name}}" type="hidden">
+                <input class="form-control mx-auto w-auto" id="ignore" name="ignore" value="True" type="hidden">
+            </div>
+            <button class="btn btn-primary" type="submit">Ignore</button>
+        </form>
+    {% endfor %}
+{% endif %}
 {% endblock %}

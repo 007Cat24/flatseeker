@@ -33,11 +33,18 @@ def after_request(response):
 @login_required
 def index():
     """Show main page"""
-    return render_template("index.html")
+
+    # Query database for friend requests:
+    friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ?", session["user_id"])
+    for friend in friend_requests:
+        rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
+        friend["user1_name"] = rows[0]["username"]
+    return render_template("index.html", friend_requests=friend_requests, user_id = session["user_id"])
+
 
 @app.route("/add", methods=["GET", "POST"])
 @login_required
-def add():
+def add_flat():
     """Allow user to add flats"""
 
     if request.method == "POST":
@@ -80,6 +87,71 @@ def add():
     else:
         return render_template("add.html")
 
+@app.route("/addfriend", methods=["GET", "POST"])
+@login_required
+def add_friend():
+    """Allow user to add friends"""
+
+    if request.method == "POST":
+        # Make sure that all fields are filled out
+        friend = request.form.get("friend")
+        print(friend)
+        # Prevent users from adding themselves
+        if session["username"] == friend:
+            return apology("You can't add yourself!")
+
+        # Query database for username
+        rows = db.execute(
+            "SELECT * FROM users WHERE username = ?", friend)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1:
+            flash("Username not found")
+            return redirect("/addfriend")
+
+
+        # Check if friend request already exists:
+        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? AND user2_id = ?", session["user_id"], rows[0]["id"])
+        print(friend_requests)
+        if len(friend_requests) == 1:
+            flash("Friend request already sent")
+            return redirect("/")
+
+
+        # Accept friend if request already exists, ignore otherwise:
+        friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        if len(friend_requests) == 1:
+            ignore = request.form.get("ignore")
+            if ignore == "False":
+                db.execute("UPDATE friends SET confirmed = 'True' WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend request accepted")
+                return redirect("/")
+            elif ignore == "True":
+                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend request ignored")
+                return redirect("/")
+            else:
+                return apology("Server error")
+
+        # Delete friend
+        confirmed_friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        ignore = request.form.get("ignore")
+        if ignore == "True":
+                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend deleted")
+                return redirect("/")
+
+        # Add friend request to database
+        db.execute(
+            "INSERT INTO friends (user1_id, user2_id, confirmed) VALUES(?, ?, ?)",
+            session["user_id"],
+            rows[0]["id"],
+            "False",
+        )
+        flash("Friend request sent!")
+        return redirect("/")
+    else:
+        return render_template("addfriend.html")
 
 
 @app.route("/changepwd", methods=["GET", "POST"])
@@ -118,6 +190,29 @@ def changepwd():
         # Show registration form
         return render_template("changepwd.html")
 
+@app.route("/friends")
+@login_required
+def friends():
+    """Show list of friends"""
+
+    # Query database for friends:
+    friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?", session["user_id"], session["user_id"])
+    for friend in friends:
+        if friend["user1_id"] != session["user_id"]:
+            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
+            friend["user1_name"] = rows[0]["username"]
+        else:
+            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user2_id"])
+            friend["user1_name"] = rows[0]["username"]
+    return render_template("friends.html", friends=friends)
+
+@app.route("/view")
+@login_required
+def viewallflats():
+    """Show list of all flats"""
+
+    return apology("Todo")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -149,6 +244,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         # Redirect user to home page
         return redirect("/")
