@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Flat #{{ flat.id }}
+{% endblock %}
+
+{% block main %}
+<div class="card">
+    <h5 class="card-header">Flat #{{ flat.id }}</h5>
+    <div class="card-body">
+      <h5 class="card-title">{{ flat.title }}</h5>
+      <table class="table table-sm table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Cost</th>
+                <th>Number of rooms</th>
+                {% if flat.location %}
+                <th>Location</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ flat.price }}€</td>
+                <td>{{ flat.rooms }}</td>
+                {% if flat.location %}
+                <td>{{ flat.location }}</td>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
+    <p class="card-text">Comments: {{ flat.comments }}</p>
+      <a href="{{ flat.link }}" class="btn btn-primary">Link to the flat</a>
+      <a href="/edit?q={{ flat.id }}" class="btn btn-primary">Edit</a>
+      <a href="#" class="btn btn-danger">Delete</a>
+    </div>
+    <div class="card-footer text-muted">
+       Added by {{ flat.username }} on {{ flat.timestamp }}
+      </div>
+  </div>
+{% endblock %}

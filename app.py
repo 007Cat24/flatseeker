@@ -219,9 +219,12 @@ def viewflat():
     """Show individual flat"""
     flat_id = request.args.get('id')
     if flat_id:
-        flats = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
-        if len(flats) == 1:
-            return flats
+        flat = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
+        if len(flat) == 1:
+            flat = flat[0]
+            rows = db.execute("SELECT username FROM users WHERE id = ?", flat["added_by"])
+            flat["username"] = rows[0]["username"]
+            return render_template("flat.html", flat=flat)
         else:
             return apology("Flat not found")
     else:
