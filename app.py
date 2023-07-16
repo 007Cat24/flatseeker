@@ -111,7 +111,6 @@ def add_friend():
 
 
         # Check if friend request already exists:
-        print("checking if already exists")
         friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user1_id = ? AND user2_id = ?", session["user_id"], rows[0]["id"])
         print(friend_requests)
         if len(friend_requests) == 1:
@@ -120,7 +119,6 @@ def add_friend():
 
 
         # Accept friend if request already exists, ignore otherwise:
-        print("accepting if exists")
         friend_requests = db.execute("SELECT * FROM friends WHERE confirmed = 'False' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
         if len(friend_requests) == 1:
             ignore = request.form.get("ignore")
@@ -134,6 +132,14 @@ def add_friend():
                 return redirect("/")
             else:
                 return apology("Server error")
+
+        # Delete friend
+        confirmed_friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+        ignore = request.form.get("ignore")
+        if ignore == "True":
+                db.execute("DELETE FROM friends WHERE user2_id = ? AND user1_id = ?", session["user_id"], rows[0]["id"])
+                flash("Friend deleted")
+                return redirect("/")
 
         # Add friend request to database
         db.execute(
@@ -189,12 +195,15 @@ def changepwd():
 def friends():
     """Show list of friends"""
 
-    return apology("Todo")
     # Query database for friends:
     friends = db.execute("SELECT * FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?", session["user_id"], session["user_id"])
     for friend in friends:
-        rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
-        friend["user1_name"] = rows[0]["username"]
+        if friend["user1_id"] != session["user_id"]:
+            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user1_id"])
+            friend["user1_name"] = rows[0]["username"]
+        else:
+            rows = db.execute("SELECT username FROM users WHERE id = ?", friend["user2_id"])
+            friend["user1_name"] = rows[0]["username"]
     return render_template("friends.html", friends=friends)
 
 @app.route("/view")
