@@ -29,7 +29,9 @@
             </tr>
         </tbody>
     </table>
+    {% if flat.comments %}
     <p class="card-text">Comments: {{ flat.comments }}</p>
+    {% endif %}
       <a href="{{ flat.link }}" class="btn btn-primary">Link to the flat</a>
       <a href="/edit?id={{ flat.id }}" class="btn btn-primary">Edit</a>
       <a href="/delete?id={{ flat.id }}" class="btn btn-danger">Delete</a>
