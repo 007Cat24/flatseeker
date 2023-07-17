@@ -249,7 +249,7 @@ def viewallflats():
     """Show list of all flats"""
     flats = db.execute("SELECT * FROM flats")
     valid_flats = []
-    for flat in flat
+    for flat in flats:
         friend1 = db.execute("SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed='True'", flat["added_by"])
         friend2 = db.execute("SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed='True'", flat["added_by"])
 
