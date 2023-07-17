@@ -264,7 +264,15 @@ def viewflat():
                 "SELECT username FROM users WHERE id = ?", flat["added_by"]
             )
             flat["username"] = rows[0]["username"]
-            return render_template("flat.html", flat=flat)
+            friend1 = db.execute("SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed='True'", flat["added_by"])
+            friend2 = db.execute("SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed='True'", flat["added_by"])
+
+            # Source for following line: https://stackoverflow.com/questions/3897499/check-if-value-already-exists-within-list-of-dictionaries-in-python
+            if any(entry['user1_id'] == session["user_id"] for entry in friend1) or any(entry['user2_id'] == session["user_id"] for entry in friend2) or session["user_id"] == flat["added_by"]:
+                return render_template("flat.html", flat=flat)
+            else:
+                return apology("Unauthorised")
+
         else:
             return apology("Flat not found")
     else:
