@@ -293,7 +293,7 @@ def deleteflat():
         return apology("Invalid input")
 
 
-@app.route("/edit")
+@app.route("/edit", methods=["GET", "POST"])
 @login_required
 def editflat():
     """Edit flat"""
@@ -304,9 +304,46 @@ def editflat():
             flat = flat[0]
             # Make sure users can only edit their own flat
             if flat["added_by"] == session["user_id"]:
-                # TODO: Serve form with edit fields
+                # Serve form with edit fields
+                if request.method == "GET":
+                    return render_template("edit.html", flat=flat)
                 # TODO: Save changes
-                return redirect("/view")
+                if request.method == "POST":
+
+                    # Make sure that all fields are filled out
+                    title = request.form.get("title")
+                    link = request.form.get("link")
+                    rooms = request.form.get("rooms")
+                    price = request.form.get("price")
+                    location = request.form.get("location")
+                    comments = request.form.get("comments")
+
+                    if not title or not link or not rooms or not price:
+                        return apology("Please fill out all required fields before submitting!")
+
+                    # Validate numeric inputs
+                    if rooms.isnumeric() and int(rooms) >= 1:
+                        rooms = int(rooms)
+                    else:
+                        return apology("Please only enter numbers in the room field")
+
+                    if price.isnumeric() and int(price) > 0:
+                        price = int(price)
+                    else:
+                        return apology("Please only enter numbers in the price field")
+
+                    db.execute(
+                        "UPDATE flats SET title = ?, link = ?, rooms = ?, price = ?, location = ?, comments = ? WHERE id = ?",
+                        title,
+                        link,
+                        rooms,
+                        price,
+                        location,
+                        comments,
+                        flat_id
+                        )
+                    flash("Flat edited successfully")
+                    return redirect("/view")
             else:
                 return apology("Unauthorised")
         else:
