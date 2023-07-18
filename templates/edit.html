@@ -5,27 +5,27 @@
 {% endblock %}
 
 {% block main %}
-<h3>Edit Flat #{{ flat.id }}</h3>
+<h3>Editing Flat #{{ flat.id }}</h3>
 <br>
     <form action="/edit?id={{ flat.id }}" method="post">
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" value="{{ flat.title }}" type="text" required>
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="title" name="title" value="{{ flat.title }}" placeholder="Title" type="text" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="link" name="link" value="{{ flat.link }}" type="url" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="link" name="link" value="{{ flat.link }}" placeholder="URL" type="url" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="rooms" name="rooms" value="{{ flat.rooms }}" type="text" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="rooms" name="rooms" value="{{ flat.rooms }}" placeholder="Rooms" type="text" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="price" name="price" value="{{ flat.price }}" type="text" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="price" name="price" value="{{ flat.price }}" placeholder="Price in €" type="text" required>
         </div>
         <p>Optional:</p>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" id="location" name="location" value="{{ flat.location }}" type="text">
+            <input class="form-control mx-auto w-auto" id="location" name="location" value="{{ flat.location }}" placeholder="Location" type="text">
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="comments" name="comments" value="{{ flat.comments }}" type="text">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="comments" name="comments" value="{{ flat.comments }}" placeholder="Comments" type="text">
         </div>
         <button class="btn btn-primary" type="submit">Save changes</button>
     </form>
