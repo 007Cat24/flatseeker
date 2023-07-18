@@ -180,6 +180,29 @@ def add_friend():
     else:
         return render_template("addfriend.html")
 
+@app.route("/comment", methods=["POST"])
+@login_required
+def comment():
+    """Allow user to comment"""
+    flat_id = request.form.get("flat_id")
+    type = request.form.get("type")
+    if not flat_id or not type:
+        return apology("Please use the form to submit comments")
+    flats = db.execute("SELECT * FROM flats WHERE id = ?", flat_id)
+    for flat in flats:
+        friend1 = db.execute("SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed='True'", flat["added_by"])
+        friend2 = db.execute("SELECT user2_id FROM friends WHERE user1_id = ? AND confirmed='True'", flat["added_by"])
+
+        # Source for following line: https://stackoverflow.com/questions/3897499/check-if-value-already-exists-within-list-of-dictionaries-in-python
+        if any(entry['user1_id'] == session["user_id"] for entry in friend1) or any(entry['user2_id'] == session["user_id"] for entry in friend2) or session["user_id"] == flat["added_by"]:
+            if type == "ADD":
+                db.execute("INSERT INTO comments (flat_id, user_id, text) VALUES(?, ?, ?)", flat_id, session["user_id"], request.form.get("comment"))
+            elif type == "DELETE":
+                comment_id = request.form.get("comment_id")
+                db.execute("DELETE FROM comments WHERE id = ?", comment_id)
+            return redirect("/flat?id=" + flat_id)
+        else:
+            return apology("Unauthorised")
 
 @app.route("/changepwd", methods=["GET", "POST"])
 @login_required
@@ -278,7 +301,11 @@ def viewflat():
 
             # Source for following line: https://stackoverflow.com/questions/3897499/check-if-value-already-exists-within-list-of-dictionaries-in-python
             if any(entry['user1_id'] == session["user_id"] for entry in friend1) or any(entry['user2_id'] == session["user_id"] for entry in friend2) or session["user_id"] == flat["added_by"]:
-                return render_template("flat.html", flat=flat)
+                comments = db.execute("SELECT * FROM comments WHERE flat_id = ?", flat_id)
+                for comment in comments:
+                    rows = db.execute("SELECT username FROM users WHERE id = ?", comment["user_id"])
+                    comment["username"] = rows[0]["username"]
+                return render_template("flat.html", flat=flat, comments=comments)
             else:
                 return apology("Unauthorised")
 
