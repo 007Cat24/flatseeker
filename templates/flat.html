@@ -33,8 +33,10 @@
     <p class="card-text">Comments: {{ flat.comments }}</p>
     {% endif %}
       <a href="{{ flat.link }}" class="btn btn-primary">Link to the flat</a>
-      <a href="/edit?id={{ flat.id }}" class="btn btn-primary">Edit</a>
-      <a href="/delete?id={{ flat.id }}" class="btn btn-danger">Delete</a>
+      {% if flat.added_by == session.user_id %}
+      <a href="/edit?id={{ flat.id }}" class="btn btn-outline-primary">Edit</a>
+      <a href="/delete?id={{ flat.id }}" class="btn btn-outline-danger">Delete</a>
+      {% endif %}
     </div>
     <div class="card-footer text-muted">
        <small>Added by {{ flat.username }} on {{ flat.timestamp }}</small>

@@ -305,7 +305,7 @@ def viewflat():
                 for comment in comments:
                     rows = db.execute("SELECT username FROM users WHERE id = ?", comment["user_id"])
                     comment["username"] = rows[0]["username"]
-                return render_template("flat.html", flat=flat, comments=comments)
+                return render_template("flat.html", flat=flat, comments=comments, session=session)
             else:
                 return apology("Unauthorised")
 
