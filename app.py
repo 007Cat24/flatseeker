@@ -516,3 +516,18 @@ def change_username():
     """Change username"""
     if request.method == "GET":
         return render_template("username.html")
+    elif request.method == "POST":
+        new_username = request.form.get("new_username")
+
+        if not new_username:
+            return apology("Please enter a username")
+
+        rows = db.execute("SELECT * FROM users WHERE username = ?", new_username)
+        if len(rows) == 0:
+            db.execute("UPDATE users SET username = ? WHERE id = ?", new_username, session["user_id"])
+            session["username"] = new_username
+            flash("Username changed successfully")
+        else:
+            return apology("Username not available")
+
+        return redirect("/profile")
