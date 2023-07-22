@@ -509,3 +509,10 @@ def profile():
     else:
         flat_count = f"{flat_count} flats"
     return render_template("profile.html", flat_count=flat_count, friend_count=friend_count)
+
+@app.route("/changeusername", methods=["GET", "POST"])
+@login_required
+def change_username():
+    """Change username"""
+    if request.method == "GET":
+        return render_template("username.html")
