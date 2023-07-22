@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+    <h1>Hello, {{session["username"]}}</h1>
+    <h3>You currently have added {{flat_count}} and {{friend_count}}</h3>
+    <br>
+    <a href="/changepwd" class="btn btn-primary">Change password</a>
+    <a href="/changeusername" class="btn btn-primary">Change username</a>
+{% endblock %}

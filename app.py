@@ -88,7 +88,7 @@ def add_flat():
             comments,
         )
         flash("Flat added successfully")
-        return redirect("/")
+        return redirect("/view")
     else:
         return render_template("add.html")
 
@@ -270,7 +270,7 @@ def friends():
 @login_required
 def viewallflats():
     """Show list of all flats"""
-    flats = db.execute("SELECT * FROM flats")
+    flats = db.execute("SELECT * FROM flats ORDER BY timestamp DESC")
     valid_flats = []
     for flat in flats:
         friend1 = db.execute("SELECT user1_id FROM friends WHERE user2_id = ? AND confirmed='True'", flat["added_by"])
@@ -485,3 +485,27 @@ def register():
         return redirect("/")
     else:
         return render_template("register.html")
+
+@app.route("/profile")
+@login_required
+def profile():
+    """Show profile"""
+    flat_count = db.execute("SELECT COUNT(*) FROM flats WHERE added_by = ?", session["user_id"])
+    flat_count = flat_count[0]['COUNT(*)']
+    # Query database for friends:
+    friend_count = db.execute(
+        "SELECT COUNT(*) FROM friends WHERE confirmed = 'True' AND user2_id = ? OR user1_id = ?",
+        session["user_id"],
+        session["user_id"],
+    )
+    friend_count = friend_count[0]['COUNT(*)']
+    print(friend_count)
+    if friend_count == 1:
+        friend_count = "1 friend"
+    else:
+        friend_count = f"{friend_count} friends"
+    if flat_count == 1:
+        flat_count = "1 flat"
+    else:
+        flat_count = f"{flat_count} flats"
+    return render_template("profile.html", flat_count=flat_count, friend_count=friend_count)
